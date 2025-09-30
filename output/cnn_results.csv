@@ -1,0 +1,2 @@
+Model,Train_Accuracy,Test_Accuracy,Val_Accuracy,Training_Time,learning_rate,batch_size,conv_layers,input_shape,num_classes,total_params
+CNN_Tuned,0.38511749347258484,0.3878787878787879,0.38414634146341464,24.086358070373535,0.001,32,2,"(75,)",13,17229
