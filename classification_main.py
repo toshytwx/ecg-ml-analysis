@@ -260,7 +260,71 @@ def main():
     print("Class distribution after preprocessing:")
     print(dict(zip(unique, counts)))
     
-
+    # 3. Split data
+    print("\n3. Splitting data...")
+    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, 
+                                                        random_state=42, stratify=y)
+    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, 
+                                                    random_state=42, stratify=y_temp)
+    
+    # 4. Hyperparameter tuning FIRST
+    print("\n4. Running hyperparameter tuning...")
+    tuning_start_time = time.time()
+    tuning_results = run_hyperparameter_tuning(X_train, y_train)
+    
+    # 5. Train & evaluate best models
+    results = {}
+    for model_name, model_results in tuning_results.items():
+        best_model = model_results['best_estimator']
+        
+        # Train and evaluate best model
+        print(f"\nTraining and evaluating best {model_name}...")
+        train_start_time = time.time()
+        best_model.fit(X_train, y_train)
+        training_time = time.time() - train_start_time
+        
+        # Predictions
+        y_train_pred = best_model.predict(X_train)
+        y_test_pred = best_model.predict(X_test)
+        y_val_pred = best_model.predict(X_val)
+        
+        # Store results
+        results[model_name] = {
+            'train_accuracy': accuracy_score(y_train, y_train_pred),
+            'test_accuracy': accuracy_score(y_test, y_test_pred),
+            'val_accuracy': accuracy_score(y_val, y_val_pred),
+            'training_time': training_time,
+            'best_params': model_results['best_params'],
+            'best_score': model_results['best_score'],
+            'confusion_matrix': confusion_matrix(y_test, y_test_pred),
+            'best_estimator': best_model,
+            'cv_results': model_results['cv_results'],
+            'X_val': X_val,
+            'y_val': y_val,
+            'y_true': y_test,
+            'y_pred': y_test_pred
+        }
+    
+    # 6. Save results
+    results_df = pd.DataFrame({
+        'Model': list(results.keys()),
+        'Train_Accuracy': [r['train_accuracy'] for r in results.values()],
+        'Test_Accuracy': [r['test_accuracy'] for r in results.values()],
+        'Val_Accuracy': [r['val_accuracy'] for r in results.values()],
+        'Training_Time': [r['training_time'] for r in results.values()]
+    })
+    
+    results_path = os.path.join(output_dir, 'linear_classification_results.csv')
+    results_df.to_csv(results_path, index=False)
+    print(f"\nResults saved to: {results_path}")
+    
+    # 7. Create visualizations
+    print("\n7. Creating visualizations...")
+    create_enhanced_visualizations(results, output_dir)
+    
+    print("\n" + "="*80)
+    print("LINEAR CLASSIFICATION ANALYSIS COMPLETED SUCCESSFULLY!")
+    print("="*80)
 
 if __name__ == "__main__":
     main()
