@@ -18,6 +18,7 @@ from sklearn.metrics import classification_report, accuracy_score, confusion_mat
 import warnings
 from collections import Counter
 from sklearn.impute import SimpleImputer
+from imblearn.over_sampling import SMOTE, RandomOverSampler
 
 warnings.filterwarnings('ignore')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -46,7 +47,6 @@ def run_hyperparameter_tuning(X_train, y_train):
     lr_param_grid = {
         'C': [0.001, 0.01, 0.1, 1, 10, 100],
         'max_iter': [10000],
-        'multi_class': ['multinomial'],
         'solver': ['lbfgs', 'newton-cg', 'sag'],
     }
     
@@ -62,12 +62,12 @@ def run_hyperparameter_tuning(X_train, y_train):
     # Tune LogisticRegression
     print("\nTuning Logistic Regression...")
     lr_grid = GridSearchCV(
-        LogisticRegression(random_state=42),
+        LogisticRegression(random_state=42, class_weight='balanced'),
         lr_param_grid,
         cv=5,
         n_jobs=-1,
         scoring='accuracy',
-        verbose=1
+        verbose=1,
     )
     lr_grid.fit(X_train, y_train)
     results['LogisticRegression'] = {
@@ -80,7 +80,7 @@ def run_hyperparameter_tuning(X_train, y_train):
     # Tune LinearSVC
     print("\nTuning Linear SVM...")
     svm_grid = GridSearchCV(
-        LinearSVC(random_state=42),
+        LinearSVC(random_state=42, class_weight='balanced'),
         svm_param_grid,
         cv=5,
         n_jobs=-1,
@@ -246,6 +246,9 @@ def main():
         X = np.array(features_list)
         y = np.array(labels_list) - 1  # zero-based
     
+    print("before Imputer and Scaler")
+    print("Nans: " + str(np.any(np.isnan(X))) + " Infs: " + str(np.any(np.isinf(X))))
+    print(f"Feature matrix shape: {X.shape}, Labels shape: {y.shape}")
     # 2. Preprocess data
     print("\n2. Preprocessing data...")
     # Handle missing values first
@@ -255,22 +258,31 @@ def main():
     # Scale features
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
-    import numpy as np
-    unique, counts = np.unique(y, return_counts=True)
-    print("Class distribution after preprocessing:")
-    print(dict(zip(unique, counts)))
+    
+    print("after Imputer and Scaler")
+    print("Nans: " + str(np.any(np.isnan(X))) + " Infs: " + str(np.any(np.isinf(X))))
+    print(f"Feature matrix shape: {X.shape}, Labels shape: {y.shape}")
+    exit(0)
     
     # 3. Split data
     print("\n3. Splitting data...")
-    X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, 
-                                                        random_state=42, stratify=y)
-    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, 
-                                                    random_state=42, stratify=y_temp)
-    
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X, y, test_size=0.3, random_state=42, stratify=y
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp
+    )
+
+    ros = RandomOverSampler(random_state=42)
+    X_train_res, y_train_res = ros.fit_resample(X_train, y_train)
+
+    print(f"Original training set shape: {Counter(y_train)}")
+    print(f"Resampled training set shape: {Counter(y_train_res)}")
+
     # 4. Hyperparameter tuning FIRST
     print("\n4. Running hyperparameter tuning...")
     tuning_start_time = time.time()
-    tuning_results = run_hyperparameter_tuning(X_train, y_train)
+    tuning_results = run_hyperparameter_tuning(X_train_res, y_train_res)
     
     # 5. Train & evaluate best models
     results = {}
