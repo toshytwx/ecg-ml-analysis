@@ -1,0 +1,32 @@
+{
+  "name": "ecg-age-prediction-webapp",
+  "version": "1.0.0",
+  "description": "ECG Age Prediction Web Application",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "cd server && node server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && nodemon server.js",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "install-client": "cd client && npm install",
+    "install-server": "cd server && npm install",
+    "install-all": "npm run install-server && npm run install-client"
+  },
+  "keywords": [
+    "ecg",
+    "machine-learning",
+    "age-prediction",
+    "healthcare"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "form-data": "^4.0.4",
+    "node-fetch": "^3.3.2"
+  }
+}

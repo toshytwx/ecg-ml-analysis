@@ -61,6 +61,9 @@ pip install torch torchvision torchaudio
 pip install scikit-learn pandas numpy matplotlib seaborn
 pip install wfdb tqdm imbalanced-learn
 pip install jupyter notebook
+
+# Node.js 16+ (for web application)
+npm install
 ```
 
 ### Installation
@@ -80,6 +83,19 @@ cd ecg_ml_analysis/v2
 jupyter notebook notebooks/
 ```
 
+4. **Set up web application (optional)**
+```bash
+# Install all dependencies
+npm run install-all
+
+# Start web application
+npm run dev
+
+# Or start individually:
+npm run server    # Backend on port 3001
+npm run client    # Frontend on port 3000
+```
+
 ## 📁 Project Structure
 
 ```
@@ -91,6 +107,15 @@ v2/
 │   ├── 04_linear_training.ipynb       # Logistic regression
 │   ├── 05_random_forest_training.ipynb # Random forest
 │   └── 06_rnn_training.ipynb         # RNN/LSTM training
+├── client/                            # React web application
+│   ├── src/components/                # React components
+│   ├── public/                       # Static assets
+│   └── package.json                  # Frontend dependencies
+├── server/                           # Node.js backend
+│   ├── server.js                     # Express server
+│   ├── predict_ecg.py              # Python prediction script
+│   ├── package.json                # Server dependencies
+│   └── env.example                 # Environment variables
 ├── input/                             # Dataset (ignored by git)
 ├── output/                            # Generated features
 │   └── ecg_features.csv              # Extracted features
@@ -98,10 +123,20 @@ v2/
 ├── train_*.py                        # Original Python training scripts
 ├── wfdb_parser.py                    # WFDB data parser
 ├── process_raw_data.py              # Data preprocessing
-└── classify_with_autoencoder.py     # Autoencoder classification
+├── classify_with_autoencoder.py     # Autoencoder classification
+├── package.json                      # Root project coordination
+└── README.md                         # This file
 ```
 
 ## 🔧 Key Features
+
+### Web Application Features
+- **Real-time Predictions**: Upload ECG files and get instant age group predictions
+- **Modern UI**: Beautiful React interface with drag & drop file upload
+- **Visual Results**: Interactive charts showing prediction confidence and probabilities
+- **File Validation**: Automatic validation of .hea/.dat file pairs
+- **Responsive Design**: Works on desktop and mobile devices
+- **Error Handling**: Comprehensive error handling and user feedback
 
 ### Advanced Techniques
 
@@ -140,6 +175,26 @@ Each notebook generates comprehensive outputs including:
 - **Per-class Performance**: Individual class accuracy and F1-scores
 
 ## 🛠️ Usage
+
+### Web Application (Fully Functional!)
+
+**Interactive ECG Age Prediction Interface**
+- Upload ECG files (.hea/.dat) through modern React interface
+- Real-time age group prediction using trained CNN model
+- Visual results with confidence scores and probability distributions
+- Drag & drop file upload with validation
+- Responsive design with modern UI/UX
+
+```bash
+# Start the web application
+npm run dev
+
+# Or start individually:
+npm run server    # Backend on port 3001
+npm run client    # Frontend on port 3000
+
+# Access at http://localhost:3000
+```
 
 ### Running Individual Models
 
@@ -206,6 +261,13 @@ This project is suitable for:
 - **WFDB**: Physiological signal reading
 - **Custom Parser**: Optimized for ECG data
 - **Feature Engineering**: Domain-specific features
+
+### Web Application Stack
+- **React**: Modern frontend with TypeScript
+- **Node.js/Express**: Backend API server
+- **Python Integration**: ML model inference
+- **Styled Components**: Modern UI design
+- **File Upload**: Drag & drop with validation
 
 ## 🤝 Contributing
 
