@@ -172,7 +172,8 @@ app.post('/api/upload', upload.fields([
         res.json({
           predicted_age_group: prediction.predicted_class,
           confidence: prediction.confidence,
-          all_probabilities: prediction.probabilities
+          all_probabilities: prediction.probabilities,
+          signal_data: prediction.signal_data
         });
       } catch (parseErr) {
         console.error('Parse error:', parseErr);

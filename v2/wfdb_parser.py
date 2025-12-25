@@ -3,7 +3,7 @@
 wfdb_parser.py
 
 Direct parser for PhysioNet .dat/.hea files using WFDB library.
-Creates a dataset that can be used directly with PyTorch for CNN training.
+Creates a dataset that can be used directly with PyTorch for CNN and RNN training.
 """
 
 import os
@@ -23,24 +23,8 @@ import glob
 warnings.filterwarnings('ignore')
 
 class WFDBECGDataset(Dataset):
-    """
-    PyTorch Dataset for ECG signals from PhysioNet .dat/.hea files.
-    Handles signal preprocessing, windowing, and augmentation directly.
-    """
-    
     def __init__(self, data_path, subject_info_csv, window_size_sec=10, 
                  window_step_sec=5, augment=False, preload=False):
-        """
-        Initialize the dataset.
-        
-        Args:
-            data_path: Path to directory containing .dat/.hea files
-            subject_info_csv: Path to CSV with subject metadata
-            window_size_sec: Size of sliding windows in seconds
-            window_step_sec: Step size for sliding windows in seconds
-            augment: Whether to apply data augmentation
-            preload: Whether to preload all data into memory
-        """
         self.data_path = data_path
         self.window_size_sec = window_size_sec
         self.window_step_sec = window_step_sec
@@ -55,8 +39,6 @@ class WFDBECGDataset(Dataset):
         self.hea_files = glob.glob(os.path.join(data_path, "*.hea"))
         self.hea_files.sort()
         
-        print(f"Found {len(self.hea_files)} .hea files")
-        
         # Process files and build dataset
         self.samples = []
         self.classes_set = set()
@@ -68,9 +50,6 @@ class WFDBECGDataset(Dataset):
         self.classes_ = sorted([c for c in self.classes_set if not np.isnan(c)])
         self.le = LabelEncoder()
         self.le.fit(self.classes_)
-        
-        print(f"Dataset created: {len(self.samples)} samples, {len(self.classes_)} classes")
-        print(f"Classes: {self.classes_}")
         
         # Preload data if requested
         if self.preload:

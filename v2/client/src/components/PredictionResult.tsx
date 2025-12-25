@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import ECGVisualizer from './ECGVisualizer';
 
 const ResultContainer = styled.div`
   padding: 40px 20px;
@@ -125,17 +126,20 @@ const ProbabilityValue = styled.div`
   color: #333;
 `;
 
+// 2. Оновлюємо інтерфейс, щоб він приймав signal_data
 interface PredictionResultProps {
   prediction: {
     predicted_age_group: number;
     confidence: number;
     all_probabilities: number[];
+    signal_data?: number[]; // <--- Додано це поле (опціональне, щоб не ламалось якщо даних немає)
   };
 }
 
 const PredictionResult: React.FC<PredictionResultProps> = ({ prediction }) => {
   console.log('PredictionResult received:', prediction);
-  const { predicted_age_group, confidence, all_probabilities } = prediction;
+  // 3. Деструктуризація signal_data
+  const { predicted_age_group, confidence, all_probabilities, signal_data } = prediction;
   
   const ageLabels = [
     '18-25', '26-30', '31-35', '36-40', '41-45',
@@ -163,7 +167,9 @@ const PredictionResult: React.FC<PredictionResultProps> = ({ prediction }) => {
             </ConfidenceBar>
           </InfoItem>
         </PredictionInfo>
-
+        {signal_data && signal_data.length > 0 && (
+          <ECGVisualizer data={signal_data} />
+        )}
         <ProbabilitiesSection>
           <ProbabilitiesTitle>All Age Group Probabilities</ProbabilitiesTitle>
           {(all_probabilities || []).map((prob, index) => (
@@ -185,4 +191,3 @@ const PredictionResult: React.FC<PredictionResultProps> = ({ prediction }) => {
 };
 
 export default PredictionResult;
-

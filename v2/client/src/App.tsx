@@ -25,6 +25,7 @@ interface Prediction {
   predicted_age_group: number;
   confidence: number;
   all_probabilities: number[];
+  signal_data: number[];
 }
 
 function App() {

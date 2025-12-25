@@ -13,9 +13,6 @@ import wfdb.processing as wp
 DATA_PATH = "/Users/dmytro/Diploma/ecg_ml_analysis/v2/input/autonomic-aging-a-dataset-to-quantify-changes-of-cardiovascular-autonomic-function-during-healthy-aging-1.0.0"              # Folder with .dat and .hea files
 SUBJECT_INFO_CSV = "/Users/dmytro/Diploma/ecg_ml_analysis/v2/input/autonomic-aging-a-dataset-to-quantify-changes-of-cardiovascular-autonomic-function-during-healthy-aging-1.0.0/subject-info.csv"
 TABULAR_CSV = "/Users/dmytro/Diploma/ecg_ml_analysis/v2/output/ecg_features.csv"
-WINDOWED_DIR = "/Users/dmytro/Diploma/ecg_ml_analysis/v2/output/neural_windows"
-WINDOW_SIZE_SEC = 10              # Window size for CNN/RNN in seconds
-WINDOW_STEP_SEC = 5               # Sliding step in seconds
 ECG_CLIP_RANGE = (-10.0, 10.0)  # Physiological ECG range in mV
 
 # ---------------- HELPER FUNCTIONS ----------------
@@ -123,25 +120,6 @@ def extract_signal_features(signal, fs):
 
     return features
 
-def create_multi_lead_windows(signals, fs, window_size_sec, step_size_sec):
-    window_size = int(window_size_sec * fs)
-    step_size = int(step_size_sec * fs)
-    n_channels = signals.shape[1]
-    segments = []
-
-    for start in range(0, signals.shape[0] - window_size + 1, step_size):
-        window = signals[start:start + window_size, :]
-        window_norm = np.zeros_like(window)
-        for ch in range(n_channels):
-            w = sanitize_signal(window[:, ch])
-            std = np.std(w)
-            if std > 1e-8:
-                window_norm[:, ch] = (w - np.mean(w)) / std
-            else:
-                window_norm[:, ch] = w - np.mean(w)
-        segments.append(window_norm)
-    return np.array(segments)
-
 def extract_multi_lead_features(signals):
     n_channels = signals.shape[1]
     features = {}
@@ -194,8 +172,6 @@ def main():
     subject_info = pd.read_csv(SUBJECT_INFO_CSV)
     subject_info = subject_info.set_index('ID')
 
-    # Skip windowed directory creation since we're not using it
-    # os.makedirs(WINDOWED_DIR, exist_ok=True)
     hea_files = glob.glob(os.path.join(DATA_PATH, "*.hea"))
     
     print(f"Processing {len(hea_files)} files (memory-efficient mode)...")
@@ -248,10 +224,6 @@ def main():
             features_agg['device'] = device
 
             all_tabular_features.append(features_agg)
-
-            # Skip windowed data creation to save memory
-            # (This is handled by wfdb_parser.py for CNN/RNN training)
-            print(f"Processed {record_name} - features extracted, skipping windows to save memory")
 
         except Exception as e:
             print(f"Error processing {record_name}: {e}")

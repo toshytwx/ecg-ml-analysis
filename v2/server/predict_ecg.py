@@ -194,7 +194,7 @@ def predict_age_group(session_dir, model_path):
         
         # Preprocess signal
         processed_signal = preprocess_signal(signal)
-        
+        signal_snippet = processed_signal[0:2000].flatten().tolist() if len(processed_signal) > 0 else []
         # Convert to tensor
         signal_tensor = torch.FloatTensor(processed_signal)
         
@@ -224,7 +224,8 @@ def predict_age_group(session_dir, model_path):
         return {
             'predicted_class': predicted_class,
             'confidence': confidence,
-            'probabilities': prob_list
+            'probabilities': prob_list,
+            'signal_data': signal_snippet
         }
         
     except Exception as e:
